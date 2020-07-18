@@ -1,0 +1,152 @@
+<meta charset="utf-8"/>
+<html>
+<head>
+    <title>Yinda Zhang Homework 4: Query Table</title>
+    <script type="text/javascript">
+        function getJsonData(url)
+        {
+            if(url.length == 0)
+            {
+                alert("Please enter a url!");
+                return null;
+            }
+
+            var request = new XMLHttpRequest();
+            request.open("GET", url, false);
+            try
+            {
+                request.send();
+            }
+            catch(e)
+            {
+                alert("JSON File not Exist!");
+                return null;
+            }
+            if(request.readyState == XMLHttpRequest.DONE && request.status == 200)
+            {
+                try
+                {
+                    json_data = JSON.parse(request.responseText);
+                }
+                catch
+                {
+                    alert("Invalid JSON File!");
+                    return null;
+                }
+                return json_data;
+            }
+            else
+            {
+                alert("JSON File not Exist!");
+                return null;
+            }
+        }
+
+        function createTable(url)
+        {
+            json_data = getJsonData(url);
+            if(json_data == null) return;
+            context = generateHTML(json_data);
+            if(context)
+            {
+                building_window = window.open("", "HW4 Building List", "height=800, width=1200");
+                building_window.document.write(context);
+                building_window.document.close();
+            }
+        }
+
+        function generateHTML(json_data)
+        {
+            var root = json_data.DocumentElement;
+            var context = "<html><head><title> Buildings Json Data </title></head><body>";
+            context += "<table border='2'>";
+            // table header
+            context += "<tr>";
+            header_data = json_data.Mainline.Table.Header.Data;
+            for(i = 0; i < header_data.length; ++i)
+                context += "<th>" + header_data[i] + "</th>";
+            context += "</tr>";
+            // table body
+            body_data = json_data.Mainline.Table.Row;
+            if(!body_data)
+            {
+                alert("No Building data in the JSON File");
+                return null;
+            }
+            for(i = 0; i < body_data.length; ++i)
+            {
+                context += "<tr>";
+                var row = body_data[i];
+                // may have empty cells, so insert one by one
+                if(row.Rank)
+                    context += "<td>" + row.Rank + "</td>";
+                else
+                    context += "<td></td>";
+
+                if(row.Name)
+                    context += "<td>" + row.Name + "</td>";
+                else
+                    context += "<td></td>";
+
+                if(row.Hubs && row.Hubs.Hub)
+                {
+                    context += "<td><ul>";
+                    var hub = row.Hubs.Hub
+                    for(j = 0; j < hub.length; ++j)
+                    {
+                        if(j == 0)
+                            context += "<li><b>" + hub[j] + "</b></li>";
+                        else
+                            context += "<li>" + hub[j] + "</li>";
+                    }
+                    context += "</ul></td>";
+                }
+                else
+                    context += "<td></td>";
+
+                if(row.Height)
+                    context += "<td>" + row.Height + "</td>";
+                else
+                    context += "<td></td>";
+
+                context += "<td>";
+                if(row.HomePage)
+                    context += "<a href=\"" + row.HomePage + "\">" + row.HomePage + "</a>";
+                context += "</td>";
+
+                context += "<td>";
+                if(row.Logo)
+                    context += "<img src=\"" + row.Logo + "\" style=\"display: block; margin: 0 auto; width: 150px; height: 150px;\"></img>";
+                context += "</td>";
+
+                context += "</tr>";
+            }
+
+            context += "</table>";
+            context += "</bo" + "dy></html>";
+
+            return context;
+        }
+
+    </script>
+
+    <style type="text/css">
+        div.query_window
+        {
+            text-align: center;
+            margin: 120px auto;
+            width: 800px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="query_window">
+    <h3>Enter URL for list of tallest buildings JSON File</h3>
+    <input type="text" name="URL" id="url" size="28"><br>
+    <br>
+    <input type="button" name="Submit" value="Submit Query" onclick=createTable(document.getElementById("url").value)>
+</div>
+
+</body>
+</html>

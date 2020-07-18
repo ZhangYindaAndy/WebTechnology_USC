@@ -1,0 +1,109 @@
+div.main
+{
+    text-align: center;
+    margin: 0 auto;
+    width: 800px;
+}
+
+div.box
+{
+    text-align: center;
+    margin: 0 auto;
+    /*margin: 40px 50px 50px 50px;*/
+    padding: 12px;
+    border-style: solid;
+    border-width: 1.5px;
+    width: 635px;
+    height: 100px;
+}
+div.lower
+{
+    text-align: center;
+    margin: 0 auto;
+    /*height: 100px;*/
+}
+div.nature
+{
+    text-align: left;
+    margin: 12px 20px 0;
+    /*height: 20px;*/
+}
+
+p.big-name
+{
+    font-size: 52.5px;
+    font-family: Georgia;
+    margin: 6px 0 0 0;
+    /*margin: 0 auto;*/
+}
+
+p.copyright
+{
+    font-size: 10px;
+    font-family: Georgia;
+    font-style: italic;
+    /*color: grey;*/
+    margin: 0 auto;
+}
+
+img.main
+{
+    height: 100%;
+    width: auto;
+    left: 50%;
+    position: relative;
+    display: block;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+}
+div.cover
+{
+    width: 375px;
+    height: 375px;
+    overflow: hidden;
+    border: 1.5px solid white;
+    position: relative;
+}
+
+img.sub
+{
+    width: 20px;
+    height: 20px;
+    border: 8px solid white;
+    display: block;
+    /*position: relative;*/
+}
+
+table
+{
+    margin: 0 auto;
+    position: relative;
+}
+table.small-name
+{
+    font-size: 13px;
+    font-family: Georgia;
+    font-style: italic;
+    color: gray;
+    padding: 0 10px;
+    /*margin: 0 auto;*/
+}
+td.small-name
+{
+    padding: 0 10px;
+}
+
+a
+{
+    text-decoration: none;
+}
+
+
+
+
+
+
+
+
+

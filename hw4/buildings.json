@@ -1,0 +1,88 @@
+{
+  "Mainline": {
+    "Table": {
+      "Header": {
+          "Data": [
+          "Rank of building",
+          "Name of Building",
+          "Location Info",
+          "Feet",
+          "Wikipedia Page",
+          "Logo"
+          ]
+      },  
+      "Row": [
+          
+        {
+          "Rank": "1",
+          "Name": "Burj Khalifa",
+          "Hubs": {
+            "Hub": ["111"
+            ]
+          },
+          "Height": "2,717",
+          "HomePage": null,
+          "Logo": "https://csci571.com/hw/hw4/Burj_Khalifa.jpg"
+        },
+          
+        {
+          "Rank": "2",
+          "Name": "Shanghai Tower",
+          "Hubs": {
+            "Hub": []
+          },
+          "Height": null,
+          "HomePage": "https://en.wikipedia.org/wiki/Shanghai_Tower",
+          "Logo": null
+        },  
+          
+          
+        {
+          "Rank": null,
+          "Name": null,
+          "Hubs": {
+            "Hub": [
+              "Mecca",
+              "Saudi Arabia",
+              "Tallest building with a clock face. Tallest in Saudi Arabia."
+            ]
+          },
+          "Height": "1,971",
+          "HomePage": "https://en.wikipedia.org/wiki/Abraj_Al_Bait",
+          "Logo": "https://csci571.com/hw/hw4/Abraj-al-Bait-Towers.JPG"
+        },          
+          
+        {
+          "Rank": "4",
+          "Name": "Ping An Finance Center",
+          "Hubs": {
+            "Hub": [
+              "Shenzhen",
+              "China",
+              "Tallest building in Shenzhen and Guangdong Province. Shares the record of the highest observation deck with Shanghai Tower (#2) at 562 m."
+            ]
+          },
+          "Height": "1,965",
+          "HomePage": "https://en.wikipedia.org/wiki/Ping_An_Finance_Centre",
+          "Logo": "https://csci571.com/hw/hw4/Ping_An_Finance_Center_201512.jpg"
+        }, 
+          
+        {
+          "Rank": "5",
+          "Name": "Goldin Finance 117",
+          "Hubs": {
+            "Hub": [
+              "Tianjin",
+              "China",
+              "Tallest building in China outside of Shanghai and Guangdong province."
+            ]
+          },
+          "Height": "1,957",
+          "HomePage": "https://en.wikipedia.org/wiki/Goldin_Finance_117",
+          "Logo": "https://csci571.com/hw/hw4/Goldin_Finance_117_3.jpg"
+        }     
+        
+      ]
+    }
+  }
+}
