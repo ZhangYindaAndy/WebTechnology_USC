@@ -1,0 +1,56 @@
+.search-bar
+{
+    width: 17rem;
+    color: black;
+}
+
+.nav-bar
+{
+    background-image: linear-gradient(to right, #002944, #005dbc) !important;
+}
+
+.focus-inner::-moz-focus-inner
+{
+    border: 0 !important;
+}
+
+.modal-body
+{
+    text-align: center;
+}
+
+.section-card-title
+{
+    font-style: italic;
+    font-weight: bold;
+    display: inline-block !important;
+    font-size: 1.1rem;
+}
+
+.small-card-title
+{
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+
+.toast-massage
+{
+    color: black !important;
+}
+
+.inline-display
+{
+    display: inline-block !important;
+}
+
+.spinner
+{
+    transform: translateY(400%);
+}
+
+.switcher
+{
+    margin-top: 0.25rem;
+    margin-right: 0.5rem;
+}
