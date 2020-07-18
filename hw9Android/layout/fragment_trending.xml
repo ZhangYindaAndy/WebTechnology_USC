@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorScreen">
+
+    <TextView
+        android:id="@+id/trending_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:text="Enter Search Term :"
+        android:textColor="#000000"
+        android:textSize="20dp" />
+    <EditText
+        android:id="@+id/trending_query"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/trending_text"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:hint="CoronaVirus"
+        android:inputType="text"
+        />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="590dp"
+        android:layout_below="@+id/trending_query"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp" />
+
+</RelativeLayout>
