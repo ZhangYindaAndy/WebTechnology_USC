@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Yinda Zhang Homework 6</title>
+    <meta charset="utf-8"/>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+    <script type="text/javascript">
+        function create_cloud()
+        {
+            function draw(words) 
+            {
+              svg
+                .append("g")
+                  .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                  .selectAll("text")
+                    .data(words)
+                  .enter().append("text")
+                    .style("font-size", function(d) { return d.size + "px"; })
+                    .style("fill", "#000000")
+                    .style("font-weight", "900")
+                    .attr("text-anchor", "middle")
+                    .style("font-family", "Impact")
+                    .attr("transform", function(d) {
+                      return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                    })
+                    .text(function(d) { return d.text; });
+            }
+            // List of words
+            // var myWords = [{word: "Running", size: "10"}, {word: "Surfing", size: "20"}, {word: "Climbing", size: "50"}, {word: "Kiting", size: "30"}, {word: "Sailing", size: "20"}, {word: "Snowboarding", size: "60"} ]
+            var myWords = loadJson("/cloud");
+            myWords = myWords.words;
+
+            // set the dimensions and margins of the graph
+            var margin = {top: 2.5, right: 2.5, bottom: 2.5, left: 2.5},
+                width = 250 - margin.left - margin.right,
+                height = 200 - margin.top - margin.bottom;
+
+            // append the svg object to the body of the page
+            var svg = d3.select("#my_dataviz").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform",
+                      "translate(" + margin.left + "," + margin.top + ")");
+
+            // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
+            // Wordcloud features that are different from one word to the other must be here
+            var layout = d3.layout.cloud()
+              .size([width, height])
+              .words(myWords.map(function(d) { return {text: d.word, size:d.size}; }))
+              .padding(2.5)        //space between words
+              .rotate(function() { return ~~(Math.random() * 2) * 90; })
+              .fontSize(function(d) { return d.size; })      // font size of words
+              .on("end", draw);
+            layout.start();
+        }
+
+        function google_news(event)
+        {
+            event.className = "big_button visited";
+            document.getElementById("B2").className = "big_button";
+            init();
+        }
+
+        function search(event)
+        {
+            event.className = "big_button visited";
+            document.getElementById("B1").className = "big_button";
+
+            clearInterval(interval);
+
+            var cat_options = ["all", "business", "entertainment", "general", "health", "science", "sports", "technology"];
+            var context = "<div class=\"search_window\">";
+            context += "<form method=\"POST\" action=\"/query\" target=myIframe>";
+
+            context += "<div>";
+            context += "Keyword <font color=\"#FF0000\">*</font><input type=\"text\" id=\"keyword\" name=\"keyword\" value=\"\" required=\"required\" />";
+            context += "From <font color=\"#FF0000\">*</font><input type=\"date\" id=\"date_from\" name=\"date_from\" title=\"Please fill out this field.\" required />";
+            context += "To <font color=\"#FF0000\">*</font><input type=\"date\" id=\"date_to\" name=\"date_to\" title=\"Please fill out this field.\" required />";
+            context += "</div>";
+
+            context += "<div>"; 
+            context += "Category<select id=\"category\" name=\"category\" onchange=\"if(this.selectedIndex >= 0) load_dynamic_source(this.value);\">";
+            for(i = 0; i < cat_options.length; ++i)
+                context += "<option value=\"" + cat_options[i] + "\">" + cat_options[i] + "</option>";
+            context += "</select>";
+
+            context += "Source<select id=\"source\" name=\"source\">";
+            context += "<option value=\"all\">all</option>";
+            context += "</select>"
+            context += "</div>";
+
+            context += "<div>";
+            context += "<input type=\"submit\" name=\"search\" value=\"Search\" class=\"search_button\" onclick=\"create_search_result()\">";
+            context += "<input type=\"button\" name=\"clear\" value=\"Clear\" class=\"search_button\" onclick=\"clear_search()\">";
+            context += "</div>";
+
+            context += "</form></div>";
+
+            // search result
+            context += "<div class=\"search_result\" id=\"search_result\"></div>"
+
+            // for submit not jump
+            context += "<iframe id=\"myIframe\" name=\"myIframe\" style=\"display: none\"></iframe>";
+
+            document.getElementById("main").innerHTML = context;
+            init_date();
+            load_dynamic_source("all");
+        }
+        function clear_search()
+        {
+            search(document.getElementById("B2"));
+        }
+        function load_dynamic_source(value)
+        {
+            var sources = loadJson("/sources/" + value);
+            sources = sources.sources;
+            var options = "<option value=\"all\">all</option>";
+            for(i = 0; i < sources.length; ++i)
+                options += "<option value=\"" + sources[i].id + "\">" + sources[i].name + "</option>";
+            document.getElementById("source").innerHTML = options;
+        }
+        function init_date()
+        {
+            var now_date = new Date();
+            document.getElementById("date_to").value = format_date(now_date, 0);
+            var old_date = new Date(now_date.getTime() - 7*24*60*60*1000);
+            document.getElementById("date_from").value = format_date(old_date, 0);
+        }
+        function format_date(date, t)
+        {
+            month = '' + (date.getMonth() + 1);
+            day = '' + date.getDate();
+            year = date.getFullYear();
+            if(month.length < 2)
+                month = '0' + month;
+            if(day.length < 2)
+                day = '0' + day;
+            if(t == 0)
+                return [year, month, day].join('-');
+            else
+                return [month, day, year].join('/');
+        }
+        function create_search_result()
+        {
+            start_date = document.getElementById("date_from").value;
+            end_date = document.getElementById("date_to").value;
+            if(new Date(start_date).getTime() > new Date(end_date).getTime())
+            {
+                alert("Incorrect time");
+                return;
+            }
+            if(document.getElementById("keyword").value.length == 0)
+                return;
+
+            var query = document.getElementById("keyword").value + "&";
+            query += start_date + "&";
+            query += end_date + "&";
+            query += document.getElementById("source").value;
+            query_result = loadJson("/query/" + query);   // global
+
+            if(query_result.error)
+            {
+                alert(query_result.error.message);
+                return;
+            }
+            query_result = query_result.articles;
+            var context = "";
+            if(query_result.length == 0)
+                context += "No results";
+            else
+            {
+                for(i = 0; i < 5; ++i)
+                {
+                    if(i == query_result.length)
+                        break;
+                    var news = query_result[i];
+                    context += "<div id=\"" + i + "\">";
+                    context += "<div class=\"search_card\" id=\"" + i + "C\" onclick=\"show_detail(this)\">";
+                    context += "<img src=\"" + news.urlToImage + "\" class=\"search_img\">";
+                    context += "<div class=\"text_container\">";
+                    context += "<h3><b>" + news.title + "</b></h3>";
+                    // context += "<p class=\"hidden\">" + news.description + "</p>";
+                    context += "<p>" + truncate_text(news.description) + "</p>";
+                        
+                    context += "</div></div></div>";
+                }
+                if(query_result.length > 5)
+                {
+                    context += "<input type=\"button\" class=\"search_button\" id=\"show_button\" value=\"Show More\" style=\"margin-top: 5px\" onclick=\"show_extra()\">";
+                }
+            }
+            document.getElementById("search_result").innerHTML = context;
+            card_org_info = [];
+        }
+        function truncate_text(description)
+        {
+            var tmp = "";
+            if(description.length > 75)
+            {
+                tmp = description.substring(0, 75);
+                tmp = tmp.substring(0, tmp.lastIndexOf(" ")) + "...";
+            }
+            else
+                tmp = description;
+            return tmp;
+        }
+        function show_detail(card)
+        {
+            var card_id = parseInt(card.id);
+            card_org_info[card_id] = document.getElementById(card_id.toString()).innerHTML;
+
+            card.style.height = "135px";
+            card.onclick = null;
+
+            var news = query_result[card_id];
+            var context = "";
+            context += "<img src=\"" + news.urlToImage + "\" class=\"search_img\">";
+            context += "<div class=\"text_container\">";
+            context += "<h3><b>" + news.title + "</b></h3>";
+            context += "<p><b>Author: </b>" + news.author + "</p>";
+            context += "<p><b>Source: </b>" + news.source.name + "</p>";
+            context += "<p><b>Date: </b>" + format_date(new Date(news.publishedAt), 1) + "</p>";
+            context += "<p>"+ news.description + "<p>";
+            context += "<a href=\"" + news.url + "\" target=\"view_window\">See Original Post</a>";
+            context += "</div>";
+            context += "<input type=\"button\" class=\"close_button\" value=\"✕\" id=\"" + card_id + "B\" onclick=\"clear_card(this)\">";
+
+            // add close button
+            card.innerHTML = context;
+
+        }
+        function clear_card(b)
+        {
+            var id = parseInt(b.id);
+            card_block = document.getElementById(id.toString());            
+            card_block.innerHTML = card_org_info[id];
+        }
+        function show_extra()
+        {
+            // remove the show button
+            var doc = document.getElementById("search_result");
+            formal_context = doc.innerHTML;  // global
+            doc.removeChild(doc.childNodes[doc.childNodes.length - 1]);
+
+            var context = ""; 
+            for(i = 5; i < query_result.length; ++i)
+            {
+                var news = query_result[i];
+                context += "<div id=\"" + i + "\">";
+                context += "<div class=\"search_card\" id=\"" + i + "C\" onclick=\"show_detail(this)\">";
+                context += "<img src=\"" + news.urlToImage + "\" class=\"search_img\">";
+                context += "<div class=\"text_container\">";
+                context += "<h3><b>" + news.title + "</b></h3>";
+                // context += "<p class=\"hidden\">" + news.description + "</p>";
+                context += "<p>" + truncate_text(news.description) + "</p>";
+                context += "</div></div></div>";
+            }
+            context += "<input type=\"button\" class=\"search_button\" id=\"show_button\" value=\"Show Less\" style=\"margin-top: 5px\" onclick=\"show_less()\">";
+            doc.innerHTML += context;
+        }
+        function show_less()
+        {
+            document.getElementById("search_result").innerHTML = formal_context;
+        }
+        function loadJson(url)
+        {
+            var request = new XMLHttpRequest();
+            try
+            {
+                request.open("GET", url, false);  // async
+                request.send();
+                // console.log(request.readyState);
+                // console.log(request.status);
+                if(request.readyState == 4 && request.status == 200)
+                {
+                    return JSON.parse(request.responseText);
+                }
+            }
+            catch(e)
+            {
+                alert("wrong");
+            }
+        }
+        function init()
+        {
+            var slides = loadJson("/index/slides");
+            var cnn_news = loadJson("/index/cnn");
+            var fox_news = loadJson("/index/fox");
+
+            contexts = create_slides(slides.articles);
+
+            var context = "<div style=\"display: grid; grid-template-columns: 375px 275px;\">"
+            context += "<div id=\"slide_block\" style=\"width: 700px; margin: 0 auto;\"></div>";  // slide
+            context += "<div id=\"my_dataviz\" class=\"cloud_block\"></div></div>";  // cloud
+
+            context += "<h1 style=\"margin:30px auto 2.5px; font-size: 22.5px;\"><b>CNN</b></h1><hr>";
+            context += create_grid(cnn_news.articles);
+            
+            context += "<h1 style=\"margin: 10px auto 2.5px; font-size: 22.5px;\"><b>Fox News</b></h1><hr>"
+            context += create_grid(fox_news.articles);
+
+            document.getElementById("main").innerHTML = context;
+            create_cloud();
+
+            slide_index = 0;
+            iterate_slide();
+            interval = setInterval(iterate_slide, 3000);
+
+        }
+        function iterate_slide()
+        {
+            document.getElementById("slide_block").innerHTML = contexts[slide_index];
+            slide_index += 1;
+            slide_index %= contexts.length;
+        }
+        function create_slides(news)
+        {
+            contexts = Array();
+            for(i = 0; i < news.length; ++i)
+            {
+                var context = "<div class=\"slides_card\" onclick=window.open(\"" + news[i].url + "\")>";
+                context += "<img src=\"" + news[i].urlToImage + "\" class=\"slide_img\">";
+                context += "<div class=\"slides_text\">"
+                context += "<h3><b>" + news[i].title + "</b></h3>";
+                context += "<p>" + news[i].description + "</p>";
+                context += "</div></div>";
+                contexts.push(context);
+            }
+            return contexts;
+            
+        }
+        function create_grid(news)
+        {
+            var context = "<div class=\"grid-container\">";
+            for(i = 0; i < news.length; ++i)
+            {
+                context += "<div class=\"card\" onclick=window.open(\"" + news[i].url + "\")>"; 
+                context += "<img src=\"" + news[i].urlToImage + "\" class=\"card-img\">";
+                context += "<h3><b>" + news[i].title + "</b></h3>";
+                context += "<p>" + news[i].description + "</p>";
+                context += "</div>";
+            }
+            context += "</div>";
+            return context;
+        }
+    </script>
+    <style type="text/css">
+        div.main_window
+        {
+            text-align: center;
+            margin: 10px auto;
+            width: 650px;
+            display: grid;
+        }
+
+        /*  button  */
+        .button_position
+        {
+            position: fixed;
+            float: left;
+            display: block;
+            width: 100px;
+        }
+        .big_button
+        {
+            /*display: inline-block;*/
+            box-shadow: 0 0px 1px 0 rgba(0, 0, 0);
+            background-color: #f4f4f4;
+
+            border: 0;
+            color: black;
+            text-align: center;
+            text-decoration: none;
+            font-size: 10px;
+            font-family: Georgia;
+            padding: 2.5px;
+            height: 25px;
+            width: 100px;
+            transition: all 0.5s;
+            cursor: pointer;
+            display: block;
+            outline: none;
+        }
+        .big_button:hover
+        {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .big_button::-moz-focus-inner
+        {
+            border: 0;
+        }
+        .visited
+        {
+            background-color: #545454;
+            color: white;
+        }
+
+        /*  slide  */
+        .slides_card
+        {
+            position: relative;
+            cursor: pointer;
+            width: 350px;
+            height: 200px;
+        }
+        .slides_text
+        {
+            background-color: rgba(100, 100, 100, 0.6);
+            color: white;
+            font-size: 9px;
+            position: absolute;
+            width: 350px;
+            bottom: 0;
+        }
+        img.slide_img
+        {
+            width: 350px;
+            height: 200px;
+            /*transition: 0.8s cubic-bezier(0.2, 0.82, 0.2, 1);*/
+            z-index: -1;
+        }
+        .cloud_block
+        {
+            width: 250px;
+            background-color: #F9F9F9;
+            text-align: center;
+        }
+
+        /*  card  */
+        .grid-container
+        {
+            display: grid;
+            grid-gap: 25px 5px;
+            grid-template-columns: 155px 155px 155px 155px;
+            padding: 5px;
+        }
+        .card
+        {
+            width: 150px;
+            height: 250px;
+            border-radius: 2.5px;
+            box-shadow: 1px 1px 1.5px 0 rgba(0, 0, 0, 0.4);
+            border: 0.5px solid gray;
+            margin: 2.5px;
+            text-align: center;
+            font-family: Georgia;
+            font-size: 8px;
+            line-height: 11px;
+            background-color: #E3E3E3;
+            cursor: pointer;
+        }
+        img.card-img
+        {
+            border-radius: 2.5px;
+            width: 150px;
+            height: 90px;
+            width: 100%;
+        }
+
+        /*  search result  */
+        .search_result
+        {
+            display: grid;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .search_result .search_card
+        {
+            height: 75px;
+            width: 450px;
+            display: grid;
+            grid-template-columns: 75px 350px 25px;
+            margin: 2.5px;
+            background-color: #E3E3E3;
+            cursor: pointer;
+            border-radius: 2px;
+            border: 0.5px solid gray;
+            text-align: center;
+            font-family: Georgia;
+            font-size: 8px;
+            line-height: 11px;
+        }
+        .search_result .search_card:hover
+        {
+            box-shadow: 0 6px 9px 2px rgba(0, 0, 0, 0.2);
+        }
+        img.search_img
+        {
+            padding: 12.5px;
+            height: 50px;
+            width: 50px;
+        }
+        div.text_container
+        {
+            text-align: left;
+            font-family: Georgia;
+            line-height: 11px;
+            padding: 7px 0;
+        }
+        div.text_container p, h3
+        {
+            margin: 1px;
+        }
+        /*p.hidden
+        {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }*/
+        .close_button
+        {
+            height: 18px;
+            width: 18px;
+            background-color: #E3E3E3;
+            text-align: center;
+            border: 0;
+            cursor: pointer;
+            font-size: 10px;
+            margin-left: 6px;
+        }
+        .close_button::-moz-focus-inner
+        {
+            border: 0;
+        }
+
+        /* search form */
+        div.search_window
+        {
+            border-radius: 3px;
+            background-color: #E3E3E3;
+            display: grid;
+            font-family: Georigia;
+            width: 425px;
+            margin: 0 auto;
+            font-size: 8px;
+        }
+        form
+        {
+            display: grid;
+            grid-template-rows: 18px 18px 18px;
+            text-align: center;
+            grid-gap: 20%;
+            margin: 15px auto 30px;
+        }
+        form input
+        {
+            width: 80px;
+            margin: 0 10px;
+            border: 0;
+            border-radius: 1px;
+            font-size: 8px;
+            height: 12px;
+        }
+        form select
+        {
+            width: 70px;
+            margin: 0 10px;
+            text-align: center;
+            font-size: 8px;
+            height: 16px;
+        }
+        .search_button
+        {
+            background-color: #E3E3E3;
+            border: 0;
+            margin: 0 auto;
+            height: 15px;
+            font-size: 9px;
+            border-radius: 1px;
+        }
+        .search_button::-moz-focus-inner
+        {
+            border: 0;
+        }
+        .search_button:hover
+        {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /*  other  */
+        hr
+        {
+            border-top: 1px dotted black;
+            width: 100%;
+        }
+
+    </style>
+</head>
+
+<body onload="init()">
+<div style="margin: 0 auto; width: 900px;">
+    <div class="button_position">
+        <button class="big_button visited" id="B1" onclick="google_news(this)" style="border-top-right-radius: 3px; border-top-left-radius: 3px;">Google News</button>
+        <button class="big_button" id="B2" onclick="search(this)" style="border-bottom-right-radius: 3px; border-bottom-left-radius: 3px;">Search</button>
+    </div>
+
+    <div class="main_window" id="main"></div>
+</div>
+
+</body>
+</html>
